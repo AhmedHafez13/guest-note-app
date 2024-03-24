@@ -1,7 +1,9 @@
 import { config } from 'dotenv';
+import Server from '@app/server';
 
 config();
 
-console.log('Hello, Node.js');
-
-console.log(`Server Port: ${process.env.PORT}`);
+const server = new Server();
+server.start().catch((error) => {
+  console.error('Failed to start the server:', error);
+});

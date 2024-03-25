@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  guest-note-app-database:
+  database:
     image: mysql:8.0
     restart: always
     env_file:
@@ -11,7 +11,7 @@ services:
     ports:
       - '3306:3306'
 
-  guest-note-app-backend:
+  backend:
     build:
       context: .
       dockerfile: ${DOCKERFILE}
@@ -21,10 +21,11 @@ services:
       - '8080:8080'
     environment:
       NODE_ENV: development
+      DATABASE_URL: "mysql://${DB_USER}:${DB_PASSWORD}@database:${DB_PORT}/${DB_NAME}"
     env_file:
       - .env
     depends_on:
-      - guest-note-app-database
+      - database
 
 volumes:
   guest-note-app-db-data:

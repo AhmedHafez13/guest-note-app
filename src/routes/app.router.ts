@@ -1,7 +1,9 @@
-import { Application, Request, Response, NextFunction, Router } from 'express';
-import TestModuleRoutes from '@app/modules/dummy/dummy.routes';
-import { NotFoundError } from '@app/error-handler/error.handlers';
+import { Application, Router } from 'express';
 import BaseRouter from './base.router';
+import TestModuleRoutes from '@app/modules/dummy/dummy.routes';
+import AuthRoutes from '@app/modules/auth/auth.routes';
+import AuthMiddleware from '@app/middleware/auth.middleware';
+import ErrorHandlerMiddleware from '@app/middleware/error-handler.middleware';
 
 class AppRoutes {
   private app: Application;
@@ -23,12 +25,15 @@ class AppRoutes {
   private getAppRouters(): BaseRouter[] {
     // TODO: MOVE THIS ARRAY TO SEPARATE FILE
     return [
+      new AuthRoutes(this.app),
       new TestModuleRoutes(this.app),
       // ADD NEW ROUTERS HERE!
     ];
   }
 
-  private registerPreMiddleware(): void {}
+  private registerPreMiddleware(): void {
+    this.app.use(AuthMiddleware.authenticate);
+  }
 
   registerAppRouts() {
     for (const router of this.getAppRouters()) {
@@ -40,12 +45,7 @@ class AppRoutes {
 
   private registerPostMiddleware(): void {
     // Catch all route handler for 404 Not Found errors
-    this.app.use((_req: Request, _res: Response, next: NextFunction) => {
-      const error = new NotFoundError(
-        'Route not found or request method not allowed'
-      );
-      next(error);
-    });
+    this.app.use(ErrorHandlerMiddleware.routeNotFound);
   }
 }
 

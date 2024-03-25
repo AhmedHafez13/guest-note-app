@@ -1,8 +1,10 @@
 import express, { Express } from 'express';
+import passport from 'passport';
 import morgan from 'morgan';
 import 'express-async-errors';
 import AppRoutes from './routes/app.router';
-import { errorHandler } from './middleware/error-handler.middleware';
+import JwtStrategy from './config/jwt-strategy.config';
+import ErrorHandlerMiddleware from './middleware/error-handler.middleware';
 
 class Server {
   private app: Express;
@@ -41,6 +43,7 @@ class Server {
 
   private setupMiddleware(): void {
     this.app.use(express.json());
+    passport.use(JwtStrategy);
   }
 
   private configureRoutes(): void {
@@ -48,7 +51,7 @@ class Server {
   }
 
   private setupErrorHandling(): void {
-    this.app.use(errorHandler);
+    this.app.use(ErrorHandlerMiddleware.serverError);
 
     // TODO: Handle Unhandled Rejection
     process.on('unhandledRejection', (err) => {

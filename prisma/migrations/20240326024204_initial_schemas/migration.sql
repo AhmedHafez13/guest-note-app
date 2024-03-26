@@ -30,6 +30,19 @@ CREATE TABLE `Note` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `MediaFile` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `url` VARCHAR(255) NOT NULL,
+    `filetype` VARCHAR(255) NOT NULL,
+    `noteId` INTEGER NOT NULL,
+
+    UNIQUE INDEX `MediaFile_noteId_key`(`noteId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `NoteType` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
@@ -52,6 +65,9 @@ ALTER TABLE `Note` ADD CONSTRAINT `Note_senderId_fkey` FOREIGN KEY (`senderId`) 
 
 -- AddForeignKey
 ALTER TABLE `Note` ADD CONSTRAINT `Note_typeId_fkey` FOREIGN KEY (`typeId`) REFERENCES `NoteType`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `MediaFile` ADD CONSTRAINT `MediaFile_noteId_fkey` FOREIGN KEY (`noteId`) REFERENCES `Note`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `UserNotes` ADD CONSTRAINT `UserNotes_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

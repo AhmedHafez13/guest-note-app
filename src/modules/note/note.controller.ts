@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import NoteRepository from '@app/repositories/note.repository';
 import { UserData } from '@app/types/app.types';
+import { Note } from '@prisma/client';
 import NoteValidation from './note.validation';
+import NoteService from './note.service';
 
 /**
  * This class handles API endpoints related to note management.
@@ -15,7 +17,7 @@ class NoteController {
    */
   async createNote(req: Request, res: Response) {
     const user = req.user as UserData;
-    const userId = user?.id;
+    const userId = user.id;
     const { title, content, typeId } = req.body;
 
     const { error, value } = NoteValidation.validateCreateNote({
@@ -25,10 +27,17 @@ class NoteController {
     });
 
     if (error) {
-      return res.status(400).json({ message: error.details[0].message });
+      return res.status(422).json({ message: error.details[0].message });
     }
 
-    // TODO: CHECK IF `typeId` exists in NoteTypes
+    // Check if type exists
+    const existingType = await NoteRepository.findTypeById(value.typeId);
+
+    if (!existingType) {
+      return res.status(400).json({
+        message: 'Invalid note type. Please provide a valid type ID.',
+      });
+    }
 
     const note = await NoteRepository.createNote(
       userId,
@@ -47,7 +56,7 @@ class NoteController {
    */
   async getNotes(req: Request, res: Response) {
     const user = req.user as UserData;
-    const userId = user?.id;
+    const userId = user.id;
 
     // Get pagination parameters from query string
     const { error, value } = NoteValidation.validatePageParams(
@@ -74,19 +83,69 @@ class NoteController {
    * @param res - Express response object
    */
   async getNoteById(req: Request, res: Response) {
-    const noteId = parseInt(req.params.id);
+    const user = req.user as UserData;
+    const userId = user.id;
+    const noteId = req.params.id;
 
-    const { error, value } = NoteValidation.validateNoteId({ id: noteId });
+    const { error, value } = NoteValidation.validateNoteId({ ids: [noteId] });
 
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
 
-    const note = await NoteRepository.getNoteById(value.id);
+    // Check if the note exists and belongs to the current user
+    const note: Note | null = await NoteRepository.getNoteById(value.ids[0]);
     if (!note) {
       return res.status(404).json({ message: 'Note not found' });
+    } else if (note.senderId !== userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
     }
+
     res.status(200).json({ note });
+  }
+
+  /**
+   * Handles sharing a note with other users.
+   *
+   * @param req - Express request object containing note ID and recipient user IDs
+   * @param res - Express response object
+   */
+  async shareNote(req: Request, res: Response) {
+    const user = req.user as UserData;
+    const userId = user.id;
+    const noteId = req.params.id;
+    const { recipientIds } = req.body;
+
+    // Validate note ID and recipient user IDs
+    const { error, value } = NoteValidation.validateShareData({
+      noteId,
+      recipientIds,
+    });
+    if (error) {
+      return res.status(422).json({ message: error.details[0].message });
+    }
+
+    // Check if the note exists and belongs to the current user
+    const note: Note | null = await NoteRepository.getNoteById(value.noteId);
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    } else if (note.senderId !== userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const result = await NoteService.validateRecipientIds(
+      userId,
+      value.noteId,
+      value.recipientIds
+    );
+    if (result.error) {
+      return res.status(422).json({ message: result.message });
+    }
+
+    // Share the note with recipient users
+    await NoteService.shareNoteWithUsers(user, note, value.recipientIds);
+
+    res.status(200).json({ message: 'Note shared successfully' });
   }
 }
 

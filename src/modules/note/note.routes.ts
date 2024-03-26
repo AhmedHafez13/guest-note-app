@@ -13,6 +13,7 @@ class NoteRoutes extends BaseRouter {
     this.router.post('/', NoteController.createNote);
     this.router.get('/', NoteController.getNotes);
     this.router.get('/:id', NoteController.getNoteById);
+    this.router.post('/:id/share', NoteController.shareNote);
   }
 }
 

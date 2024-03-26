@@ -11,9 +11,9 @@ class NoteValidation {
     return schema.validate(data);
   }
 
-  public validateNoteId(data: any): Joi.ValidationResult {
+  public validateNoteId(data: { ids: any[] }): Joi.ValidationResult {
     const schema = Joi.object({
-      id: Joi.number().integer().min(1).required(),
+      ids: Joi.array().items(Joi.number().integer().min(1)).required(),
     });
 
     return schema.validate(data, { convert: true });
@@ -25,7 +25,20 @@ class NoteValidation {
   ): Joi.ValidationResult {
     const schema = Joi.object({
       page: Joi.number().integer().min(1).default(defaults.page),
-      pageSize: Joi.number().integer().min(1).max(100).default(defaults.pageSize),
+      pageSize: Joi.number()
+        .integer()
+        .min(1)
+        .max(100)
+        .default(defaults.pageSize),
+    });
+
+    return schema.validate(data, { convert: true });
+  }
+
+  public validateShareData(data: any): Joi.ValidationResult {
+    const schema = Joi.object({
+      noteId: Joi.number().integer().min(1).required(),
+      recipientIds: Joi.array().items(Joi.number().integer().min(1)).required(),
     });
 
     return schema.validate(data, { convert: true });

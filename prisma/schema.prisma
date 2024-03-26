@@ -68,6 +68,9 @@ model UserNotes {
   userId Int
   noteId Int
 
+  deletedAt DateTime?
+  unsent    Boolean   @default(false)
+
   user User @relation(fields: [userId], references: [id])
   note Note @relation(fields: [noteId], references: [id])
 

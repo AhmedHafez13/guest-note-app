@@ -5,6 +5,8 @@ import 'express-async-errors';
 import AppRoutes from './routes/app.router';
 import JwtStrategy from './config/jwt-strategy.config';
 import ErrorHandlerMiddleware from './middleware/error-handler.middleware';
+import NotificationService from './services/notification.service';
+import { GeneralNotificationChannels } from './config/notifications.config';
 
 class Server {
   private app: Express;
@@ -21,6 +23,7 @@ class Server {
     }
 
     this.setupLogger();
+    this.setupNotifications();
     this.setupMiddleware();
     this.configureRoutes();
     this.setupErrorHandling();
@@ -39,6 +42,10 @@ class Server {
 
   private setupLogger(): void {
     this.app.use(morgan('combined'));
+  }
+
+  private setupNotifications(): void {
+    NotificationService.registerChannels(GeneralNotificationChannels);
   }
 
   private setupMiddleware(): void {

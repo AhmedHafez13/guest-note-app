@@ -1,9 +1,10 @@
 import { Application, Router } from 'express';
 import BaseRouter from './base.router';
-import TestModuleRoutes from '@app/modules/dummy/dummy.routes';
-import AuthRoutes from '@app/modules/auth/auth.routes';
 import AuthMiddleware from '@app/middleware/auth.middleware';
 import ErrorHandlerMiddleware from '@app/middleware/error-handler.middleware';
+import AuthRoutes from '@app/modules/auth/auth.routes';
+import NoteRoutes from '@app/modules/note/note.routes';
+import TestModuleRoutes from '@app/modules/dummy/dummy.routes';
 
 class AppRoutes {
   private app: Application;
@@ -26,6 +27,7 @@ class AppRoutes {
     // TODO: MOVE THIS ARRAY TO SEPARATE FILE
     return [
       new AuthRoutes(this.app),
+      new NoteRoutes(this.app),
       new TestModuleRoutes(this.app),
       // ADD NEW ROUTERS HERE!
     ];

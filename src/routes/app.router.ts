@@ -5,6 +5,7 @@ import ErrorHandlerMiddleware from '@app/middleware/error-handler.middleware';
 import AuthRoutes from '@app/modules/auth/auth.routes';
 import NoteRoutes from '@app/modules/note/note.routes';
 import TestModuleRoutes from '@app/modules/dummy/dummy.routes';
+import TimelineNoteRoutes from '@app/modules/timeline-note/timeline-note.routes';
 
 class AppRoutes {
   private app: Application;
@@ -28,6 +29,7 @@ class AppRoutes {
     return [
       new AuthRoutes(this.app),
       new NoteRoutes(this.app),
+      new TimelineNoteRoutes(this.app),
       new TestModuleRoutes(this.app),
       // ADD NEW ROUTERS HERE!
     ];

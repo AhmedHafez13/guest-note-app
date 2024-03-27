@@ -32,20 +32,20 @@ class EmailService {
    *
    * @param to - The recipient's email address
    * @param subject - The email subject line
-   * @param text - The email content in plain text format
+   * @param body - The email content in plain text format
    * @returns A Promise that resolves when the email is sent or rejects on error
    */
-  async sendEmail(to: string, subject: string, text: string) {
+  async sendEmail(to: string, subject: string, body: string) {
     const mailOptions = {
       from: process.env.EMAIL_USER, // Sender's email address
       to,
       subject,
-      text,
+      text: body,
     };
 
     try {
+      console.log(`>>> Sending Email to ${to}`, subject, body);
       await this.transporter.sendMail(mailOptions);
-      console.log(`Email sent to ${to}`);
     } catch (error) {
       console.error('Error sending email:', error);
     }

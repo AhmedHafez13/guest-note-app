@@ -1,4 +1,4 @@
-import prismaClient from '@app/prisma-client';
+import PrismaClient from '@app/prisma-client';
 import { UserRegisterData } from '@app/modules/auth/auth.types';
 import { User } from '@prisma/client';
 
@@ -13,8 +13,7 @@ class UserRepository {
    * @returns A Promise that resolves to a User object if found, null otherwise
    */
   static async findByEmail(email: string): Promise<User | null> {
-    prismaClient;
-    const user = await prismaClient.user.findUnique({
+    const user = await PrismaClient.user.findUnique({
       where: { email },
     });
     return user;
@@ -27,7 +26,7 @@ class UserRepository {
    * @returns A Promise that resolves to the newly created User object
    */
   static async createUser(userData: UserRegisterData): Promise<User> {
-    const createdUser = await prismaClient.user.create({
+    const createdUser = await PrismaClient.user.create({
       data: userData,
     });
     return createdUser;
@@ -40,7 +39,7 @@ class UserRepository {
    * @returns A Promise that resolves to true if the user exists, false otherwise
    */
   static async userExists(email: string): Promise<boolean> {
-    const userCount = await prismaClient.user.count({
+    const userCount = await PrismaClient.user.count({
       where: { email },
     });
     return userCount > 0;
@@ -53,7 +52,7 @@ class UserRepository {
    * @returns A Promise that resolves to an array of validated user IDs (those that exist in the database)
    */
   static async validateUserIds(userIds: number[]): Promise<number[]> {
-    const existingUsers = await prismaClient.user.findMany({
+    const existingUsers = await PrismaClient.user.findMany({
       where: { id: { in: userIds } },
       select: { id: true },
     });

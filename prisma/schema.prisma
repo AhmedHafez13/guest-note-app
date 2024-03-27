@@ -68,6 +68,7 @@ model UserNotes {
   userId Int
   noteId Int
 
+  createdAt DateTime  @default(now())
   deletedAt DateTime?
   unsent    Boolean   @default(false)
 

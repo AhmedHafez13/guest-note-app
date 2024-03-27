@@ -7,6 +7,7 @@ import JwtStrategy from './config/jwt-strategy.config';
 import ErrorHandlerMiddleware from './middleware/error-handler.middleware';
 import NotificationService from './services/notification.service';
 import { GeneralNotificationChannels } from './config/notifications.config';
+import DailyNotificationConfig from './config/daily-notification.config';
 
 class Server {
   private app: Express;
@@ -45,6 +46,7 @@ class Server {
   }
 
   private setupNotifications(): void {
+    DailyNotificationConfig.scheduleDailyNotifications();
     NotificationService.registerChannels(GeneralNotificationChannels);
   }
 

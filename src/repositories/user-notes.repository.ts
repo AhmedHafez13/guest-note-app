@@ -1,4 +1,5 @@
 import PrismaClient from '@app/prisma-client';
+import { UserNotesSummary } from '@app/types/app.types';
 import { UserNotes } from '@prisma/client';
 
 /**
@@ -83,6 +84,33 @@ class UserNotesRepository {
       userId: share.userId,
       userName: share.user.username,
     }));
+  }
+
+  /**
+   * Fetches a summary of user notes created within the last 24 hours.
+   *
+   * @returns {Promise<UserNotesSummary[]>} A Promise that resolves to an array of `UserNotesSummary` objects.
+   */
+  static async getUsersNotesSummary(): Promise<UserNotesSummary[]> {
+    const startDate = new Date();
+    startDate.setDate(new Date().getDate() - 1);
+
+    const userNotes = await PrismaClient.userNotes.findMany({
+      select: {
+        userId: true,
+        noteId: true,
+        user: { select: { email: true, username: true } },
+        note: { select: { type: { select: { name: true } } } },
+      },
+      where: {
+        deletedAt: null,
+        unsent: false,
+        createdAt: { gte: startDate.toISOString() },
+        note: { type: { disabled: false } },
+      },
+    });
+
+    return userNotes;
   }
 
   /**

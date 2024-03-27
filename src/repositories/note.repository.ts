@@ -72,7 +72,10 @@ class NoteRepository {
     const notes = await PrismaClient.note.findMany({
       where: {
         UserNotes: {
-          some: { userId },
+          some: {
+            userId,
+            deletedAt: null,
+          },
         },
         NOT: {
           type: { disabled: true },
@@ -83,6 +86,9 @@ class NoteRepository {
         createdAt: {
           gte: startDate.toISOString(),
         },
+        deletedAt: {
+          equals: null
+        }
       },
       skip: skip,
       take: pageSize,

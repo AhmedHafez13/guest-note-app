@@ -1,0 +1,79 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  username       String  @unique @db.VarChar(255)
+  email          String  @unique @db.VarChar(255)
+  password       String  @db.Text
+  profilePicture String? @db.VarChar(255)
+  firstName      String? @db.VarChar(255)
+  lastName       String? @db.VarChar(255)
+
+  // Relationships
+  notes     Note[]
+  userNotes UserNotes[]
+}
+
+model Note {
+  id        Int       @id @default(autoincrement())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  title    String @db.VarChar(255)
+  message  String @db.Text
+  senderId Int
+  typeId   Int
+
+  // Relationships
+  sender    User        @relation(fields: [senderId], references: [id])
+  type      NoteType    @relation(fields: [typeId], references: [id])
+  UserNotes UserNotes[]
+  media     MediaFile[]
+}
+
+model MediaFile {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  url      String @db.VarChar(255)
+  filetype String @db.VarChar(255)
+  noteId   Int    @unique
+
+  // Relationships
+  note Note @relation(fields: [noteId], references: [id])
+}
+
+model NoteType {
+  id Int @id @default(autoincrement())
+
+  name     String  @unique @db.VarChar(255)
+  disabled Boolean @default(false)
+  Note     Note[]
+}
+
+model UserNotes {
+  userId Int
+  noteId Int
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  unsent    Boolean   @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+  note Note @relation(fields: [noteId], references: [id])
+
+  @@id([userId, noteId])
+}
